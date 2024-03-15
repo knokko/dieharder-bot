@@ -8,7 +8,9 @@ import kotlin.random.Random
 enum class ExperimentType {
     MATLAB,
     SEEDED,
-    UNSEEDED
+    UNSEEDED,
+    JAVA,
+    CRYPTO;
 }
 
 class RandomExperiment(
@@ -22,13 +24,15 @@ class RandomExperiment(
         ExperimentType.MATLAB -> performMatlabTrial(tupleSize, samplesPerTest)
         ExperimentType.SEEDED -> performBuiltinTrial(tupleSize, samplesPerTest, true)
         ExperimentType.UNSEEDED -> performBuiltinTrial(tupleSize, samplesPerTest, false)
+        ExperimentType.JAVA -> performJavaTrial(tupleSize, samplesPerTest, false)
+        ExperimentType.CRYPTO -> performJavaTrial(tupleSize, samplesPerTest, true)
     }
 
     fun conduct(): List<TrialResult> {
         val results = Collections.synchronizedList(mutableListOf<TrialResult>())
         val threads = mutableListOf<Thread>()
 
-        val numThreads = if (type == ExperimentType.MATLAB) 6 else 10
+        val numThreads = if (type == ExperimentType.MATLAB) 4 else 10
         for (threadIndex in 0 until numThreads) {
             val thread = Thread {
                 for (counter in 0 until numTrials / numThreads) results.add(performTrial())
