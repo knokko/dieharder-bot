@@ -32,7 +32,7 @@ class RandomExperiment(
         val results = Collections.synchronizedList(mutableListOf<TrialResult>())
         val threads = mutableListOf<Thread>()
 
-        val numThreads = if (type == ExperimentType.MATLAB) 4 else 10
+        val numThreads = if (type == ExperimentType.MATLAB) 3 else 10
         for (threadIndex in 0 until numThreads) {
             val thread = Thread {
                 for (counter in 0 until numTrials / numThreads) results.add(performTrial())
@@ -66,6 +66,18 @@ class RandomExperiment(
         while (File("$directory/$id.trials").exists()) id = rng.nextInt()
 
         TrialResult.dump(File("$directory/$id.trials"), results)
+    }
+
+    fun printPValues(results: List<TrialResult>) {
+        val numbersPerLine = 10
+        val format = "    " + Array(numbersPerLine) { "%.4f" }.joinToString(" ") + " ..."
+        println(format)
+        println(type.name.lowercase(Locale.ROOT) + "${samplesPerTest}k${tupleSize}n = [")
+        for (rawIndex in 0 until results.size / numbersPerLine) {
+            val currentResults = results.subList(numbersPerLine * rawIndex, numbersPerLine * (rawIndex + 1)).map { it.pValue }
+            println(String.format(format, *currentResults.toTypedArray()))
+        }
+        println("]")
     }
 
     fun loadAll(): List<TrialResult> {

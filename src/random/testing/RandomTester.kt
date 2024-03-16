@@ -13,8 +13,8 @@ import kotlin.math.roundToLong
 import kotlin.random.Random
 
 fun main() {
-    val experiment = RandomExperiment(ExperimentType.CRYPTO, 100, 1, 0)
-    for (counter in 0 until 15) {
+    val experiment = RandomExperiment(ExperimentType.MATLAB, 10, 1, 10000)
+    for (counter in 0 until 120) {
         experiment.save(experiment.conduct())
     }
 }
