@@ -1,6 +1,7 @@
 package random.testing
 
 import java.io.File
+import java.io.IOException
 import java.lang.Double.parseDouble
 import java.lang.Long.parseLong
 import java.nio.ByteBuffer
@@ -13,9 +14,16 @@ import kotlin.math.roundToLong
 import kotlin.random.Random
 
 fun main() {
-    val experiment = RandomExperiment(ExperimentType.MATLAB, 10, 1, 10000)
-    for (counter in 0 until 120) {
-        experiment.save(experiment.conduct())
+//    val experiment = RandomExperiment(ExperimentType.MATLAB, 10, 1, 10000)
+//    for (counter in 0 until 120) {
+//        experiment.save(experiment.conduct())
+//    }
+
+    val testRunner = TestRunner(JavaStandardGenerator(), BitDistributionTester(11), 8 * 1024 * 1024)
+    for (counter in 0 until 20) {
+        val results = testRunner.runTrials(50)
+        testRunner.saveResults(results)
+        println("finished iteration $counter")
     }
 }
 

@@ -1,0 +1,22 @@
+
+***** MCP version 13 --tiny *****
+
+
+
+============
+binr -c 1/280 (37449 bytes)
+=======
+sh: 1: bin/binr: not found
+trouble [bin/binr -c 37449 >> ./report.txt 2>&1]
+completed 0 ok, 1 crashed
+
+***** MCP version 13 --tiny *****
+
+
+
+============
+binr -c 1/280 (37449 bytes)
+=======
+sh: 1: bin/binr: not found
+trouble [bin/binr -c 37449 >> ./report.txt 2>&1]
+completed 0 ok, 1 crashed
