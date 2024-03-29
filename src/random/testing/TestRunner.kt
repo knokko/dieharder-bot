@@ -75,4 +75,16 @@ class TestRunner(
         println("size is ${results.size}")
         return results
     }
+
+    fun printPValues(name: String, results: List<TrialResult>) {
+        val numbersPerLine = 10
+        val format = "    " + Array(numbersPerLine) { "%.4f" }.joinToString(" ") + " ..."
+        println(format)
+        println("$name = [")
+        for (rawIndex in 0 until results.size / numbersPerLine) {
+            val currentResults = results.subList(numbersPerLine * rawIndex, numbersPerLine * (rawIndex + 1)).map { it.pValue }
+            println(String.format(format, *currentResults.toTypedArray()))
+        }
+        println("]")
+    }
 }

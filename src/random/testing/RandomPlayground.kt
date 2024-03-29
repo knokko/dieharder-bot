@@ -13,10 +13,11 @@ fun main() {
 //    experiment.printPValues(results)
     //generateFile()
     //printFileStats()
-    val testRunner = TestRunner(JavaStandardGenerator(), BitDistributionTester(11), 8 * 1024 * 1024)
+    val testRunner = TestRunner(JavaSecureGenerator(), DieharderTester(1), 10_000_000L)
     val results = testRunner.loadAllResults()
-//    println("${results.count { it.pValue < 0.1 }} / ${results.size}")
+//    testRunner.printPValues("java_bitdist11", results)
+    println("${results.count { it.pValue > 0.9 }} / ${results.size}")
 
-//    val testRunner = TestRunner(JavaSecureGenerator(), BitDistributionTester(3), 1024L * 1024)
+//    val testRunner = TestRunner(JavaStandardGenerator(), DieharderTester(1), 10_000_000L)
 //    println(testRunner.runTrial())
 }

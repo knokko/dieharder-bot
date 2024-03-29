@@ -19,7 +19,7 @@ fun main() {
 //        experiment.save(experiment.conduct())
 //    }
 
-    val testRunner = TestRunner(JavaStandardGenerator(), BitDistributionTester(11), 8 * 1024 * 1024)
+    val testRunner = TestRunner(JavaSecureGenerator(), DieharderTester(1), 10_000_000L)
     for (counter in 0 until 20) {
         val results = testRunner.runTrials(50)
         testRunner.saveResults(results)

@@ -10,7 +10,6 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.deleteRecursively
 import kotlin.math.pow
 import kotlin.math.roundToLong
-import kotlin.math.sqrt
 
 interface TestingSoftware {
 
@@ -27,7 +26,7 @@ class DieharderTester(private val tupleSize: Int) : TestingSoftware {
 
         val samplesPerTest = length / (2.0.pow(tupleSize).roundToLong() * 500)
         val command = arrayOf(
-                "dieharder",
+                "/home/knokko/programming/dieharder/dieharder/dieharder",
                 "-g", "201",
                 "-d", "200",
                 "-f", file.absolutePath,
@@ -166,13 +165,6 @@ class BitDistributionTester(private val tupleLength: Int) : TestingSoftware {
         val expectedCount = numTuples / numPossibilities
         if (expectedCount < 100) throw IllegalArgumentException("File is too small")
 
-        //val p = 1.0 / occurrenceCounter.size.toDouble()
-        //val expectedVariance = numTuples * p * (1.0 - p)
-//        val expectedDeviation = sqrt(expectedVariance)
-//        val actualDeviation = occurrenceCounter[0] - expectedCount
-
-        //val firstDeviation = actualDeviation / expectedDeviation
-
         var chiSquaredTestStatistic = 0.0
         for (tupleIndex in 0 until numPossibilities) {
             val absoluteDeviation = occurrenceCounter[tupleIndex] - expectedCount
@@ -181,9 +173,7 @@ class BitDistributionTester(private val tupleLength: Int) : TestingSoftware {
 
         val distribution = ChiSquaredDistribution.of(numPossibilities - 1.0)
 
-        //val pValue = normCDF(firstDeviation)
         val pValue = distribution.cumulativeProbability(chiSquaredTestStatistic)
-        //println("stat is $chiSquaredTestStatistic so cdf is ${distribution.cumulativeProbability(chiSquaredTestStatistic)}")
         val assessment = if (pValue < 0.0001 || pValue > 0.9999) Assessment.FAILED
         else if (pValue < 0.01 || pValue > 0.99) Assessment.WEAK else Assessment.PASSED
 

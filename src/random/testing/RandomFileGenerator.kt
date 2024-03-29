@@ -47,7 +47,7 @@ class MatlabRandomGenerator : RandomFileGenerator {
 abstract class JavaRandomGenerator : RandomFileGenerator {
 
     override fun generate(seed: Int, size: Long, file: File) {
-        val buffer = ByteArray(1024)
+        val buffer = if (size % 1000L == 0L) ByteArray(1000) else ByteArray(1024)
         if (size % buffer.size != 0L) throw IllegalArgumentException("Size ($size) must be a multiple of ${buffer.size}")
 
         val rng = createGenerator(seed)
