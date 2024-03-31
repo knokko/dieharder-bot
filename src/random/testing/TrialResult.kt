@@ -15,9 +15,10 @@ enum class Assessment {
 class TrialResult(
         val assessment: Assessment,
         val pValue: Double,
-        val seed: Long
+        val seed: Long,
+        val subTest: String?
 ) {
-    override fun toString() = "TrialResult($assessment, p=$pValue, seed=$seed)"
+    override fun toString() = "TrialResult($assessment, p=$pValue, seed=$seed${if (subTest != null) ", sub=$subTest" else ""})"
 
     companion object {
         fun dump(file: File, results: List<TrialResult>) {
@@ -42,7 +43,8 @@ class TrialResult(
             return TrialResult(
                     assessment = Assessment.valueOf(parts[1]),
                     pValue = parseDouble(parts[3]),
-                    seed = parseLong(parts[5])
+                    seed = parseLong(parts[5]),
+                    subTest = if (parts.size > 7) parts[7] else null
             )
         }
     }

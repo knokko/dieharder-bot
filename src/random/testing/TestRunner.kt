@@ -3,6 +3,7 @@ package random.testing
 import java.io.File
 import java.io.IOException
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.filechooser.FileSystemView
 import kotlin.math.abs
 import kotlin.random.Random
@@ -40,23 +41,28 @@ class TestRunner(
         return results
     }
 
-    fun runTrial(): TrialResult {
+    fun runTrial(): Collection<TrialResult> {
         val seed = abs((System.nanoTime() + (1234567890 * Math.random()).toLong()).toInt())
         val file = File(FileSystemView.getFileSystemView().homeDirectory.absolutePath + "/rand${UUID.randomUUID()}_$seed.bin")
         generator.generate(seed, size, file)
-        val (assessment, pValue) = tester.performTest(file)
+        val result = tester.performTest(file, seed.toLong())
         if (!file.delete()) System.err.println("Failed to delete $file")
-        return TrialResult(assessment, pValue, seed.toLong())
+        return result
     }
 
     fun runTrials(numTrials: Int): List<TrialResult> {
         val results = Collections.synchronizedList(mutableListOf<TrialResult>())
         val threads = mutableListOf<Thread>()
 
+        val resultCounter = AtomicInteger()
+
         val numThreads = generator.recommendedNumberOfThreads()
         for (threadIndex in 0 until numThreads) {
             val thread = Thread {
-                for (counter in 0 until numTrials / numThreads) results.add(runTrial())
+                for (counter in 0 until numTrials / numThreads) {
+                    results.addAll(runTrial())
+                    resultCounter.incrementAndGet()
+                }
             }
             threads.add(thread)
             thread.start()
@@ -65,8 +71,8 @@ class TestRunner(
         for (thread in threads) thread.join()
 
         threads.clear()
-        for (counter in results.size until numTrials) {
-            val thread = Thread { results.add(runTrial()) }
+        for (counter in resultCounter.get() until numTrials) {
+            val thread = Thread { results.addAll(runTrial()) }
             threads.add(thread)
             thread.start()
         }

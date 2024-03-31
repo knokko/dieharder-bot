@@ -13,14 +13,14 @@ import kotlin.math.roundToLong
 
 interface TestingSoftware {
 
-    fun performTest(file: File): Pair<Assessment, Double>
+    fun performTest(file: File, seed: Long): Collection<TrialResult>
 }
 
 class DieharderTester(private val tupleSize: Int) : TestingSoftware {
 
     override fun toString() = "dieharder$tupleSize"
 
-    override fun performTest(file: File): Pair<Assessment, Double> {
+    override fun performTest(file: File, seed: Long): Collection<TrialResult> {
         val length = file.length()
         if (length <= 0) throw IllegalArgumentException("Illegal length $length for file $file")
 
@@ -48,16 +48,16 @@ class DieharderTester(private val tupleSize: Int) : TestingSoftware {
 
         val assessment = if (pValue < 0.0001 || pValue > 0.9999) Assessment.FAILED else if (pValue < 0.05) Assessment.WEAK else Assessment.PASSED
 
-        return Pair(assessment, pValue)
+        return listOf(TrialResult(assessment, pValue, seed, null))
     }
 }
 
-class GjRandTester(private val targetTest: String?) : TestingSoftware {
+class GjRandTester() : TestingSoftware {
 
-    override fun toString() = "gjrand_$targetTest"
+    override fun toString() = "gjrand"
 
     @OptIn(ExperimentalPathApi::class)
-    override fun performTest(file: File): Pair<Assessment, Double> {
+    override fun performTest(file: File, seed: Long): Collection<TrialResult> {
         val size = file.length()
         val mb = 1024L * 1024L
 
@@ -105,14 +105,16 @@ class GjRandTester(private val targetTest: String?) : TestingSoftware {
             }
             inputScanner.close()
 
-//            for ((test, pValue) in results) {
-//                println("pValue of $test is $pValue")
-//            }
-            if (targetTest != null) finalPValue = results[targetTest]!!
+            fun assessment(pValue: Double) = if (pValue < 0.0001) Assessment.FAILED else if (pValue < 0.05) Assessment.WEAK else Assessment.PASSED
 
-            val assessment = if (finalPValue < 0.0001) Assessment.FAILED else if (finalPValue < 0.05) Assessment.WEAK else Assessment.PASSED
+            val generalResult = TrialResult(assessment(finalPValue), finalPValue, seed, null)
 
-            return Pair(assessment, finalPValue)
+            val trialResults = mutableListOf(generalResult)
+            for ((subTest, pValue) in results) {
+                trialResults.add(TrialResult(assessment(pValue), pValue, seed, subTest))
+            }
+
+            return trialResults
         } else {
             val errorScanner = Scanner(process.errorStream)
             while (errorScanner.hasNextLine()) {
@@ -132,7 +134,7 @@ class BitDistributionTester(private val tupleLength: Int) : TestingSoftware {
 
     override fun toString() = "bitdist$tupleLength"
 
-    override fun performTest(file: File): Pair<Assessment, Double> {
+    override fun performTest(file: File, seed: Long): Collection<TrialResult> {
         var numPossibilities = 1
         for (bit in 0 until tupleLength) numPossibilities *= 2
 
@@ -177,6 +179,6 @@ class BitDistributionTester(private val tupleLength: Int) : TestingSoftware {
         val assessment = if (pValue < 0.0001 || pValue > 0.9999) Assessment.FAILED
         else if (pValue < 0.01 || pValue > 0.99) Assessment.WEAK else Assessment.PASSED
 
-        return Pair(assessment, pValue)
+        return listOf(TrialResult(assessment, pValue, seed, null))
     }
 }

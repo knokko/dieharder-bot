@@ -13,10 +13,13 @@ fun main() {
 //    experiment.printPValues(results)
     //generateFile()
     //printFileStats()
-    val testRunner = TestRunner(JavaSecureGenerator(), DieharderTester(1), 10_000_000L)
+    val testRunner = TestRunner(MatlabRandomGenerator(), GjRandTester(), 10L * 1024L * 1024L * 1024L)
     val results = testRunner.loadAllResults()
-//    testRunner.printPValues("java_bitdist11", results)
-    println("${results.count { it.pValue > 0.9 }} / ${results.size}")
+    //testRunner.printPValues("matlab_bitdist1", results)
+    for (subTest in results.map { it.subTest }.toSet()) {
+        val results = results.filter { it.subTest == subTest }
+        println("$subTest: ${results.count { it.pValue < 0.1 }} / ${results.size}")
+    }
 
 //    val testRunner = TestRunner(JavaStandardGenerator(), DieharderTester(1), 10_000_000L)
 //    println(testRunner.runTrial())

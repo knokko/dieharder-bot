@@ -41,7 +41,7 @@ class MatlabRandomGenerator : RandomFileGenerator {
         failOnError(Runtime.getRuntime().exec(command))
     }
 
-    override fun recommendedNumberOfThreads() = 4
+    override fun recommendedNumberOfThreads() = 3
 }
 
 abstract class JavaRandomGenerator : RandomFileGenerator {
