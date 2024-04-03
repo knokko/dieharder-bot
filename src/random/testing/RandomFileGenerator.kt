@@ -36,7 +36,7 @@ class MatlabRandomGenerator : RandomFileGenerator {
         val matlabCommand = "fileID = fopen('${file.absolutePath}','w'); rng($seed, 'twister'); " +
                 "for i=1:1024; fwrite(fileID, randi([0 255], ${size / 1024}, 1)); end; "
         println("matlabCommand is $matlabCommand")
-        val command = arrayOf("/usr/local/MATLAB/R2023b/bin/matlab", "-batch", matlabCommand, "-nojvm")
+        val command = arrayOf(MATLAB_PATH, "-batch", matlabCommand, "-nojvm")
 
         failOnError(Runtime.getRuntime().exec(command))
     }

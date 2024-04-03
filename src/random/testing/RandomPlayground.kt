@@ -1,26 +1,22 @@
 package random.testing
 
-import org.apache.commons.statistics.distribution.ChiSquaredDistribution
-import java.io.BufferedInputStream
-import java.io.File
-import java.nio.file.Files
-import java.security.SecureRandom
-import java.util.Random
-
 fun main() {
-//    val experiment = RandomExperiment(ExperimentType.JAVA, 100, 1, 10000)
-//    val results = experiment.loadAll()
-//    experiment.printPValues(results)
-    //generateFile()
-    //printFileStats()
-    val testRunner = TestRunner(MatlabRandomGenerator(), GjRandTester(), 10L * 1024L * 1024L * 1024L)
-    val results = testRunner.loadAllResults()
-    //testRunner.printPValues("matlab_bitdist1", results)
-    for (subTest in results.map { it.subTest }.toSet()) {
-        val results = results.filter { it.subTest == subTest }
-        println("$subTest: ${results.count { it.pValue < 0.1 }} / ${results.size}")
+    val secureRunner = TestRunner(JavaSecureGenerator(), GjRandTester(), 10L * 1024L * 1024L * 1024L)
+    val secureResults = secureRunner.loadAllResults()
+
+    val matlabRunner = TestRunner(MatlabRandomGenerator(), GjRandTester(), 10L * 1024L * 1024L * 1024L)
+    val matlabResults = matlabRunner.loadAllResults().subList(0, 48 * 13)
+
+//    val javaRunner = TestRunner(JavaStandardGenerator(), GjRandTester(), 10L * 1024L * 1024L)
+//    val javaResults = javaRunner.loadAllResults().subList(0, 13000)
+
+    for (subTest in secureResults.map { it.subTest }.toSet()) {
+        println("$subTest: ${secureResults.count { it.subTest == subTest && it.pValue < 0.1 }} / ${secureResults.count { it.subTest == subTest }}")
+        println("$subTest: ${matlabResults.count { it.subTest == subTest && it.pValue < 0.1 }} / ${matlabResults.count { it.subTest == subTest }}")
+//        println("$subTest: ${javaResults.count { it.subTest == subTest && it.pValue < 0.1 }} / ${javaResults.count { it.subTest == subTest }}")
     }
 
-//    val testRunner = TestRunner(JavaStandardGenerator(), DieharderTester(1), 10_000_000L)
-//    println(testRunner.runTrial())
+//    matlabRunner.printPValues("matlab_gjrand10M", matlabResults.filter { it.subTest == null })
+//    secureRunner.printPValues("crypto_gjrand10M", secureResults.filter { it.subTest == null })
+//    javaRunner.printPValues("java_gjrand10M", javaResults.filter { it.subTest == null })
 }

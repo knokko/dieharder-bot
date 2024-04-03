@@ -26,7 +26,7 @@ class DieharderTester(private val tupleSize: Int) : TestingSoftware {
 
         val samplesPerTest = length / (2.0.pow(tupleSize).roundToLong() * 500)
         val command = arrayOf(
-                "/home/knokko/programming/dieharder/dieharder/dieharder",
+                DIEHARDER_PATH,
                 "-g", "201",
                 "-d", "200",
                 "-f", file.absolutePath,
@@ -70,7 +70,7 @@ class GjRandTester() : TestingSoftware {
         val reportDirectory = Files.createTempDirectory(null)
 
         val processBuilder = ProcessBuilder(listOf("./mcp", "--$gjSize", "-d", reportDirectory.absolutePathString()))
-        processBuilder.directory(File("/home/knokko/programming/gjrand.4.3.0.0/testunif/"))
+        processBuilder.directory(File(GJRAND_TESTUNIF_PATH))
         processBuilder.redirectInput(file)
 
         val process = processBuilder.start()

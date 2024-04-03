@@ -6,6 +6,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.filechooser.FileSystemView
 import kotlin.math.abs
+import kotlin.math.min
 import kotlin.random.Random
 
 class TestRunner(
@@ -56,7 +57,7 @@ class TestRunner(
 
         val resultCounter = AtomicInteger()
 
-        val numThreads = generator.recommendedNumberOfThreads()
+        val numThreads = min(numTrials, generator.recommendedNumberOfThreads())
         for (threadIndex in 0 until numThreads) {
             val thread = Thread {
                 for (counter in 0 until numTrials / numThreads) {
@@ -91,6 +92,6 @@ class TestRunner(
             val currentResults = results.subList(numbersPerLine * rawIndex, numbersPerLine * (rawIndex + 1)).map { it.pValue }
             println(String.format(format, *currentResults.toTypedArray()))
         }
-        println("]")
+        println("];")
     }
 }
