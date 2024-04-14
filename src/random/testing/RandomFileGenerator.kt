@@ -5,6 +5,8 @@ import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.security.SecureRandom
 import java.util.*
+import kotlin.math.roundToLong
+import kotlin.math.sqrt
 
 interface RandomFileGenerator {
 
@@ -26,22 +28,33 @@ fun failOnError(process: Process) {
     }
 }
 
-class MatlabRandomGenerator : RandomFileGenerator {
+class MatlabRandomGenerator(private val sequentialSeeds: Boolean) : RandomFileGenerator {
 
-    override fun toString() = "matlab"
+    override fun toString() = "matlab${if (sequentialSeeds) "_seq" else ""}"
 
     override fun generate(seed: Int, size: Long, file: File) {
-        if (size % 1024L != 0L) throw IllegalArgumentException("Size ($size) must be a multiple of 1000")
+        val matlabCommand = if (sequentialSeeds) {
+            val matrixSize = 1024
+            val numIterations = size / (matrixSize * matrixSize)
+            if (matrixSize * matrixSize * numIterations != size) {
+                throw IllegalArgumentException("Size ($size) must be a multiple of 1024*1024")
+            }
 
-        val matlabCommand = "fileID = fopen('${file.absolutePath}','w'); rng($seed, 'twister'); " +
-                "for i=1:1024; fwrite(fileID, randi([0 255], ${size / 1024}, 1)); end; "
+            "fileID = fopen('${file.absolutePath}', 'w'); seed = $seed; byte_matrix = zeros($matrixSize, $matrixSize); " +
+                    "for i=1:$numIterations; for x=1:$matrixSize; rng(seed + mtimes(i, $matrixSize) + x, 'twister'); " +
+                    "byte_matrix(x, :) = randi([0 255], $matrixSize, 1); end; for y=1:$matrixSize; fwrite(fileID, byte_matrix(:, y)); end; end;"
+        } else {
+            if (size % 1024L != 0L) throw IllegalArgumentException("Size ($size) must be a multiple of 1024")
+            "fileID = fopen('${file.absolutePath}','w'); rng($seed, 'twister'); " +
+                    "for i=1:1024; fwrite(fileID, randi([0 255], ${size / 1024}, 1)); end; "
+        }
         println("matlabCommand is $matlabCommand")
         val command = arrayOf(MATLAB_PATH, "-batch", matlabCommand, "-nojvm")
 
         failOnError(Runtime.getRuntime().exec(command))
     }
 
-    override fun recommendedNumberOfThreads() = 3
+    override fun recommendedNumberOfThreads() = 4
 }
 
 abstract class JavaRandomGenerator : RandomFileGenerator {

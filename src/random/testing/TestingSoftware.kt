@@ -66,6 +66,7 @@ class GjRandTester() : TestingSoftware {
         else if (size < 1024 * mb) "small"
         else if (size < 10 * 1024 * mb) "standard"
         else "big"
+        println(gjSize)
 
         val reportDirectory = Files.createTempDirectory(null)
 
